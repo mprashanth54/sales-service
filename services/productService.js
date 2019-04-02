@@ -1,10 +1,11 @@
-exports.getProducts = () => {
-  return [
-    {
-      "name": "One Plus 5",
-      "price": 35000,
-      "manufacturer": "One Plus",
-      "owner": "Prashanth"
-    }
-  ]
+const client = require('../db')
+
+exports.getProducts = async () => {
+  const result = await client.query('select * from products')
+  return result.rows
+}
+
+exports.getProductByID = async (id) => {
+  const result = await client.query(`select * from products where id = ${id}`)
+  return result.rows[0]
 }

@@ -1,9 +1,9 @@
+require('./db')
 const app = require('express')()
 const bodyParser = require('body-parser')
 const productsController = require('./controllers/productsController')
 const logisticsController = require('./controllers/logisticsController')
 const authController = require('./controllers/authController')
-const cors = require('cors')
 
 // app.use(cors())
 app.use(bodyParser.json())
