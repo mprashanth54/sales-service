@@ -9,6 +9,17 @@ exports.getQueriesProductQty = (products) => {
   })
 }
 
+exports.insertSales = async (billID, products) => {
+  const queries = products.map((product) => {
+    return knex.insert({
+      product: product.id,
+      qty: product.qty,
+      bill_no: billID
+    }).table('sales')
+  })
+  return await Promise.all(queries)
+}
+
 exports.calculatePrice = (products, productData) => {
   let cost = 0;
   products.map((product) => {
@@ -24,12 +35,12 @@ exports.calculatePrice = (products, productData) => {
 
 exports.generateBill = async (userID, products) => {
   try {
-    let bill;
     const ids = products.map((product) => { return product.id })
     const productData = await knex.select('*').from('products').whereIn('id', ids)
     await Promise.all(this.getQueriesProductQty(products))
     const totalPrice = this.calculatePrice(products, productData)
-    bill = await billService.createBill(userID, totalPrice, true)
+    let [bill] = await billService.createBill(userID, totalPrice, true)
+    await this.insertSales(bill.id, products)
     return bill
   } catch (err) {
     console.log(err)
