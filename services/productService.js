@@ -1,11 +1,26 @@
-const client = require('../db')
+const knex = require('../db')
 
 exports.getProducts = async () => {
-  const result = await client.query('select * from products')
-  return result.rows
+  return await knex.select('*').from('products')
 }
 
 exports.getProductByID = async (id) => {
-  const result = await client.query(`select * from products where id = ${id}`)
-  return result.rows[0]
+  return await knex.select('*').from('products').where({ id: id });
+}
+
+exports.insert = async (userID, manufacturerID, product) => {
+  try {
+    const productData = JSON.parse(JSON.stringify(product))
+    productData.created_at = new Date()
+    productData.created_by = userID
+    productData.manufacturer_id = manufacturerID
+    await knex.insert(productData).table('products')
+  } catch (err) {
+    console.log(err)
+    throw 'Unable to insert product'
+  }
+}
+
+exports.getPrice = async (ids) => {
+  return await knex.sum('price').from('products').havingIn({ id: ids })
 }

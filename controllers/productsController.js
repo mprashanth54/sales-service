@@ -6,15 +6,19 @@ router.get('/', async (req, res) => {
   res.json({ products: products })
 })
 
-router.post('/', (req, res) => {
-  console.log(JSON.stringify(req.body, undefined, 4));
-  // console.log(req.body)
-  res.json({ message: "In products post" })
+router.post('/:userID/:manufacturerID', async (req, res) => {
+  try {
+    const { userID, manufacturerID } = req.params
+    await productService.insert(userID, parseInt(manufacturerID), req.body)
+    res.json({ message: "Inserted products successfully" })
+  } catch (err) {
+    res.status(422).json({ message: err })
+  }
 })
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params
-  const product = await productService.getProductByID(parseInt(id))
+  const [product] = await productService.getProductByID(parseInt(id))
   res.json({ product: product })
 })
 
