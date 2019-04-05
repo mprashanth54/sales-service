@@ -8,6 +8,10 @@ exports.getProductByID = async (id) => {
   return await knex.select('*').from('products').where({ id: id });
 }
 
+exports.getProductsFromIds = async (ids) => {
+  return await knex.select('*').from('products').whereIn('id', ids)
+}
+
 exports.insert = async (userID, manufacturerID, product) => {
   try {
     const productData = JSON.parse(JSON.stringify(product))

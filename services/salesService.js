@@ -1,5 +1,6 @@
 const knex = require('../db')
 const billService = require('./billService')
+const productService = require('./productService')
 
 exports.getQueriesProductQty = (products) => {
   return products.map((product) => {
@@ -32,11 +33,10 @@ exports.calculatePrice = (products, productData) => {
   return cost
 }
 
-
 exports.generateBill = async (userID, products) => {
   try {
     const ids = products.map((product) => { return product.id })
-    const productData = await knex.select('*').from('products').whereIn('id', ids)
+    const productData = await productService.getProductsFromIds(ids)
     await Promise.all(this.getQueriesProductQty(products))
     const totalPrice = this.calculatePrice(products, productData)
     let [bill] = await billService.createBill(userID, totalPrice, true)
