@@ -1,21 +1,21 @@
 const knex = require('../db')
 const billService = require('./billService')
 
-exports.getQueriesProductQty = (products, trx) => {
+exports.getQueriesProductQty = (products) => {
   return products.map((product) => {
     return knex('products').where({ id: product.id }).decrement({
       qty: product.qty,
-    }).transacting(trx)
+    })
   })
 }
 
-exports.insertSales = async (billID, products, trx) => {
+exports.insertSales = async (billID, products) => {
   const queries = products.map((product) => {
     return knex.insert({
       product: product.id,
       qty: product.qty,
       bill_no: billID
-    }).table('sales').transacting(trx)
+    }).table('sales')
   })
   return await Promise.all(queries)
 }
@@ -34,18 +34,15 @@ exports.calculatePrice = (products, productData) => {
 
 
 exports.generateBill = async (userID, products) => {
-  const trx = knex.transaction()
   try {
     const ids = products.map((product) => { return product.id })
     const productData = await knex.select('*').from('products').whereIn('id', ids)
-    await Promise.all(this.getQueriesProductQty(products, trx))
+    await Promise.all(this.getQueriesProductQty(products))
     const totalPrice = this.calculatePrice(products, productData)
-    let [bill] = await billService.createBill(userID, totalPrice, true, trx)
-    await this.insertSales(bill.id, products, trx)
-    trx.commit()
+    let [bill] = await billService.createBill(userID, totalPrice, true)
+    await this.insertSales(bill.id, products)
     return bill
   } catch (err) {
-    trx.rollback()
     console.log(err)
     throw `Unable to create the bill`
   }
