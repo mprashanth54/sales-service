@@ -20,7 +20,3 @@ exports.insert = async (userID, manufacturerID, product) => {
     throw 'Unable to insert product'
   }
 }
-
-exports.getPrice = async (ids) => {
-  return await knex.sum('price').from('products').havingIn({ id: ids })
-}
